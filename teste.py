@@ -20,11 +20,6 @@ with st.expander("Subjetivo", expanded=True):
         label_visibility="collapsed",
     )
 
-    ciap_queixa = st.text_input(
-        "Código CIAP (opcional)",
-        placeholder="Ex: A01, D12..."
-    )
-
     st.subheader("HDA – História da Doença Atual")
     hda = st.text_area(
         "HDA",
@@ -128,4 +123,4 @@ with col1:
 
 with col2:
     if st.button("Limpar formulário"):
-        st.experimental_rerun()
+        st.rerun()

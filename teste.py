@@ -1,64 +1,63 @@
 import streamlit as st
 
-st.set_page_config(page_title="Ficha de Registro de Consulta Médica", layout="wide")
+st.set_page_config(
+    page_title="Ficha de Registro de Consulta Médica",
+    layout="wide"
+)
 
 st.title("Ficha de Registro de Consulta Médica")
 
 # =========================
 # SUBJETIVO
 # =========================
-st.header("Subjetivo")
+with st.expander("Subjetivo", expanded=True):
 
-with st.expander("Queixa principal", expanded=True):
+    st.subheader("Queixa principal")
     queixa_principal = st.text_area(
-        "Texto",
+        "Queixa principal",
         placeholder="Motivo principal da consulta...",
-        key="queixa_principal",
-        height=140,
+        height=120,
         label_visibility="collapsed",
     )
+
     ciap_queixa = st.text_input(
         "Código CIAP (opcional)",
-        placeholder="Ex: A01, D12...",
-        key="ciap_queixa",
+        placeholder="Ex: A01, D12..."
     )
 
-with st.expander("HDA – História da Doença Atual", expanded=False):
+    st.subheader("HDA – História da Doença Atual")
     hda = st.text_area(
-        "Texto",
+        "HDA",
         placeholder="Descrição detalhada da queixa abordada na consulta...",
-        key="hda",
-        height=220,
+        height=200,
         label_visibility="collapsed",
     )
 
 # =========================
 # OBJETIVO
 # =========================
-st.header("Objetivo")
+with st.expander("Objetivo", expanded=True):
 
-with st.expander("Exame físico", expanded=True):
+    st.subheader("Exame físico")
     exame_fisico = st.text_area(
-        "Texto",
+        "Exame físico",
         placeholder="Descreva os achados do exame físico...",
-        key="exame_fisico",
-        height=220,
+        height=200,
         label_visibility="collapsed",
     )
 
-with st.expander("Resultados de exames complementares", expanded=False):
+    st.subheader("Resultados de exames complementares")
     exames_texto = st.text_area(
-        "Descrição dos exames",
+        "Resultados dos exames",
         placeholder="Resultados de exames laboratoriais, imagem etc...",
-        key="exames_texto",
-        height=180,
+        height=160,
+        label_visibility="collapsed",
     )
 
     uploaded_files = st.file_uploader(
-        "Upload de exames (PDF, imagens)",
+        "Upload de exames (PDF ou imagens)",
         type=["pdf", "png", "jpg", "jpeg"],
-        accept_multiple_files=True,
-        key="uploaded_files",
+        accept_multiple_files=True
     )
 
     if uploaded_files:
@@ -67,19 +66,18 @@ with st.expander("Resultados de exames complementares", expanded=False):
 # =========================
 # AVALIAÇÃO
 # =========================
-st.header("Avaliação")
+with st.expander("Avaliação", expanded=True):
 
-with st.expander("Hipótese diagnóstica", expanded=True):
+    st.subheader("Hipótese diagnóstica")
     hipotese_diagnostica = st.text_area(
-        "Texto",
+        "Hipótese diagnóstica",
         placeholder="Hipótese(s) diagnóstica(s) da consulta...",
-        key="hipotese_diagnostica",
-        height=180,
+        height=160,
         label_visibility="collapsed",
     )
 
-with st.expander("Lista de problemas", expanded=False):
-    # Mock de lista CID/CIAP ativos
+    st.subheader("Lista de problemas")
+
     lista_problemas_ativos = [
         "Hipertensão arterial (CID I10)",
         "Diabetes mellitus tipo 2 (CID E11)",
@@ -88,41 +86,32 @@ with st.expander("Lista de problemas", expanded=False):
     ]
 
     problemas_selecionados = st.multiselect(
-        "Selecione os problemas abordados nesta consulta",
-        lista_problemas_ativos,
-        key="problemas_selecionados",
-    )
-
-    st.caption(
-        "Aqui entra o CID/CIAP automático e a possibilidade de adicionar ou não à lista ativa do paciente."
+        "Problemas abordados nesta consulta",
+        lista_problemas_ativos
     )
 
     adicionar_lista = st.checkbox(
-        "Adicionar novos problemas à lista ativa do paciente",
-        key="adicionar_lista",
+        "Adicionar problemas selecionados à lista ativa do paciente"
     )
 
 # =========================
 # PLANO
 # =========================
-st.header("Plano")
+with st.expander("Plano", expanded=True):
 
-with st.expander("Conduta", expanded=True):
+    st.subheader("Conduta")
     conduta = st.text_area(
-        "Texto",
+        "Conduta",
         placeholder="Plano terapêutico, prescrições, exames solicitados etc...",
-        key="conduta",
-        height=220,
+        height=200,
         label_visibility="collapsed",
     )
-    st.caption("Sugestão: depois podemos estruturar prescrição e solicitações de exames em formulários.")
 
-with st.expander("Pendências / Lembretes", expanded=False):
+    st.subheader("Pendências / Lembretes")
     pendencias = st.text_area(
-        "Texto",
-        placeholder="O que precisa ser avaliado em próxima consulta; demandas não abordadas/esgotadas etc...",
-        key="pendencias",
-        height=180,
+        "Pendências",
+        placeholder="O que precisa ser avaliado em próxima consulta ou ficou pendente...",
+        height=160,
         label_visibility="collapsed",
     )
 
@@ -130,6 +119,7 @@ with st.expander("Pendências / Lembretes", expanded=False):
 # AÇÕES
 # =========================
 st.divider()
+
 col1, col2 = st.columns(2)
 
 with col1:

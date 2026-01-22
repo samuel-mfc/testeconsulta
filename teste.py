@@ -259,7 +259,6 @@ with tab2:
 # Aba 3 - SOAP
 # -----------------------------
 with tab3:
-    st.subheader("SOAP")
     st.markdown("#### Subjetivo (S)")
     s = st.text_area(" ", height=140, placeholder="Queixas, percepções do paciente, sintomas...")
     st.markdown("#### Objetivo (O)")
@@ -267,7 +266,6 @@ with tab3:
     st.markdown("#### Avaliação (A)")
     a = st.text_area(" ", height=140, placeholder="Raciocínio clínico, hipóteses, diagnóstico...")
 
-    st.markdown("#### CID na Avaliação")
     cids = [
         ("Z00.0", "Exame geral de rotina"),
         ("I10", "Hipertensão essencial (primária)"),
@@ -289,6 +287,7 @@ with tab3:
             "subjetivo": s.strip(),
             "objetivo": o.strip(),
             "avaliacao": a.strip(),
+            "plano": p.strip()
             "cid": cid_escolhido.split(" — ")[0],
             "cid_descricao": cid_escolhido.split(" — ", 1)[1],
             "inserir_na_lista_problemas": inserir_problema,

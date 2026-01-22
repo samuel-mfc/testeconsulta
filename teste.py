@@ -10,15 +10,52 @@ st.set_page_config(page_title="Vitalis - Registro de Consulta", layout="wide")
 def init_state():
     if "registros" not in st.session_state:
         st.session_state.registros = []
-    if "problemas" not in st.session_state:
-        st.session_state.problemas = []  # lista de dicts: {"cid": "...", "descricao": "...", "data": "..."}
     if "paciente" not in st.session_state:
         st.session_state.paciente = {
-            "nome": "João da Silva",
-            "nascimento": "01/01/1980",
-            "telefone": "(11) 99999-0000",
-            "endereco": "Rua Floresta, 123, SP",
-            "idade": "45",  # opcional
+            "identificacao": {
+                "nome": "João da Silva",
+                "nascimento": "01/01/1980",
+                "idade": "45",
+                "sexo": "M",
+                "telefone": "(11) 99999-0000",
+                "endereco": "Rua Floresta, 123, SP",
+                "convenio": "Particular",
+                "prontuario": "PR-000123",
+            },
+            "diagnosticos_ativos": [
+                {"cid": "I10", "descricao": "Hipertensão essencial (primária)", "desde": "2021"},
+                {"cid": "E11", "descricao": "Diabetes mellitus tipo 2", "desde": "2019"},
+            ],
+            "medicacoes_em_uso": [
+                {"nome": "Losartana", "dose": "50 mg", "posologia": "1 cp 2x/dia"},
+                {"nome": "Metformina", "dose": "850 mg", "posologia": "1 cp 2x/dia"},
+            ],
+            "alergias": [
+                {"substancia": "Dipirona", "reacao": "Urticária"},
+            ],
+            "medidas_recentes": {
+                "pressao_arterial": "138/86 mmHg",
+                "frequencia_cardiaca": "78 bpm",
+                "peso": "86 kg",
+                "altura": "1,72 m",
+                "imc": "29,1",
+                "glicemia_capilar": "142 mg/dL",
+                "ultima_atualizacao": "Há 12 dias",
+            },
+            "habitos_risco": {
+                "tabagismo": "Não",
+                "etilismo": "Social",
+                "atividade_fisica": "2x/semana",
+                "sono": "6-7h/noite",
+            },
+            "historico_relevante": [
+                "Internação por pneumonia (2017)",
+                "Cirurgia: apendicectomia (2005)",
+            ],
+            "problemas": [
+                # lista “ativa” fictícia — diferente dos registros
+                {"cid": "M54.5", "descricao": "Dor lombar baixa", "status": "Intermitente"},
+            ],
         }
 
 def agora_str():
@@ -28,7 +65,7 @@ def salvar_registro(tipo: str, payload: dict):
     registro = {
         "data_hora": agora_str(),
         "tipo": tipo,
-        "paciente": st.session_state.paciente,
+        "paciente": st.session_state.paciente["identificacao"],
         "conteudo": payload,
     }
     st.session_state.registros.append(registro)
@@ -37,37 +74,66 @@ def exportar_json():
     return json.dumps(st.session_state.registros, ensure_ascii=False, indent=2).encode("utf-8")
 
 init_state()
+pac = st.session_state.paciente
+idp = pac["identificacao"]
 
 # -----------------------------
-# Sidebar
+# Sidebar — Folha de rosto / Resumo clínico
 # -----------------------------
-st.sidebar.title("VITALIS")
-menu = st.sidebar.radio("Menu", ["Registro de Consulta", "Pacientes", "Agenda"], index=0)
-
-st.sidebar.markdown("---")
-st.sidebar.subheader("Paciente")
-p = st.session_state.paciente
-st.sidebar.write(f"**{p['nome']}**")
+st.sidebar.markdown("## 🩺 Folha de rosto")
+st.sidebar.markdown(f"### {idp['nome']}")
 st.sidebar.caption(
-    f"Nasc.: {p['nascimento']}  |  Tel.: {p['telefone']}\n\nEnd.: {p['endereco']}"
+    f"Prontuário: **{idp['prontuario']}**  •  Convênio: **{idp['convenio']}**\n\n"
+    f"{idp['sexo']}, {idp['idade']} anos  •  Nasc.: {idp['nascimento']}\n\n"
+    f"Tel.: {idp['telefone']}\n\n"
+    f"End.: {idp['endereco']}"
 )
 
 st.sidebar.markdown("---")
-st.sidebar.subheader("Lista de Problemas")
-if st.session_state.problemas:
-    for i, prob in enumerate(st.session_state.problemas, start=1):
-        st.sidebar.write(f"{i}. **{prob['cid']}** — {prob.get('descricao','')}")
-        st.sidebar.caption(prob.get("data_hora", ""))
-else:
-    st.sidebar.caption("Nenhum problema registrado ainda.")
+st.sidebar.markdown("### 📌 Diagnósticos ativos")
+for d in pac["diagnosticos_ativos"]:
+    st.sidebar.write(f"• **{d['cid']}** — {d['descricao']} _(desde {d['desde']})_")
 
-col_sb1, col_sb2 = st.sidebar.columns(2)
-with col_sb1:
-    if st.button("Limpar problemas"):
-        st.session_state.problemas = []
-with col_sb2:
-    if st.button("Limpar registros"):
-        st.session_state.registros = []
+st.sidebar.markdown("---")
+st.sidebar.markdown("### 💊 Medicações em uso")
+for m in pac["medicacoes_em_uso"]:
+    st.sidebar.write(f"• **{m['nome']} {m['dose']}** — {m['posologia']}")
+
+st.sidebar.markdown("---")
+st.sidebar.markdown("### ⚠️ Alergias")
+if pac["alergias"]:
+    for a in pac["alergias"]:
+        st.sidebar.write(f"• **{a['substancia']}** — {a['reacao']}")
+else:
+    st.sidebar.caption("Nenhuma alergia conhecida.")
+
+st.sidebar.markdown("---")
+st.sidebar.markdown("### 🩸 Medidas recentes")
+mr = pac["medidas_recentes"]
+st.sidebar.write(f"• **PA:** {mr['pressao_arterial']}")
+st.sidebar.write(f"• **FC:** {mr['frequencia_cardiaca']}")
+st.sidebar.write(f"• **Peso/Altura:** {mr['peso']} / {mr['altura']}")
+st.sidebar.write(f"• **IMC:** {mr['imc']}")
+st.sidebar.write(f"• **Glicemia:** {mr['glicemia_capilar']}")
+st.sidebar.caption(f"Atualização: {mr['ultima_atualizacao']}")
+
+st.sidebar.markdown("---")
+st.sidebar.markdown("### 🧩 Hábitos / risco")
+hr = pac["habitos_risco"]
+st.sidebar.write(f"• Tabagismo: **{hr['tabagismo']}**")
+st.sidebar.write(f"• Etilismo: **{hr['etilismo']}**")
+st.sidebar.write(f"• Atividade física: **{hr['atividade_fisica']}**")
+st.sidebar.write(f"• Sono: **{hr['sono']}**")
+
+st.sidebar.markdown("---")
+st.sidebar.markdown("### 🗂️ Histórico relevante")
+for item in pac["historico_relevante"]:
+    st.sidebar.write(f"• {item}")
+
+st.sidebar.markdown("---")
+st.sidebar.markdown("### 🧠 Problemas (lista ativa)")
+for pr in pac["problemas"]:
+    st.sidebar.write(f"• **{pr['cid']}** — {pr['descricao']} _({pr['status']})_")
 
 st.sidebar.markdown("---")
 st.sidebar.download_button(
@@ -77,27 +143,36 @@ st.sidebar.download_button(
     mime="application/json",
 )
 
+col_sb1, col_sb2 = st.sidebar.columns(2)
+with col_sb1:
+    if st.button("Limpar registros"):
+        st.session_state.registros = []
+with col_sb2:
+    if st.button("Reset paciente"):
+        # volta ao fictício padrão
+        for k in list(st.session_state.keys()):
+            if k in ("paciente",):
+                del st.session_state[k]
+        init_state()
+        st.rerun()
+
 # -----------------------------
 # Tela principal
 # -----------------------------
 st.title("Registro de Consulta Médica")
 
-if menu != "Registro de Consulta":
-    st.info("Esta versão simples foca no **Registro de Consulta**. Podemos evoluir Pacientes/Agenda depois.")
-    st.stop()
-
-# Cabeçalho estilo “cartão do paciente”
+# Cabeçalho do paciente (cartão)
 with st.container(border=True):
     c1, c2, c3 = st.columns([2, 2, 1])
     with c1:
-        st.markdown(f"### {p['nome']}")
-        st.caption(f"Data de nascimento: {p['nascimento']} • Endereço: {p['endereco']}")
+        st.markdown(f"### {idp['nome']}")
+        st.caption(f"Nasc.: {idp['nascimento']} • Endereço: {idp['endereco']}")
     with c2:
         st.markdown("### ")
-        st.caption(f"Telefone: {p['telefone']}")
+        st.caption(f"Telefone: {idp['telefone']} • Convênio: {idp['convenio']}")
     with c3:
         st.markdown("### IDADE")
-        st.metric(label="", value=p.get("idade", "-"))
+        st.metric(label="", value=idp.get("idade", "-"))
 
 st.markdown("")
 
@@ -110,7 +185,7 @@ with tab1:
     st.subheader("Registro livre")
     texto_livre = st.text_area(
         "Escreva o registro da consulta",
-        height=260,
+        height=280,
         placeholder="Digite aqui...",
     )
 
@@ -123,42 +198,44 @@ with tab1:
             else:
                 st.warning("Escreva algo antes de salvar.")
     with col2:
-        st.caption("Dica: você pode baixar tudo em JSON pela barra lateral.")
+        st.caption("Os registros ficam na sessão e podem ser baixados em JSON pela barra lateral.")
 
 # -----------------------------
-# Aba 2 - Anamnese tradicional (igual ao layout da imagem)
+# Aba 2 - Anamnese tradicional (SEM expander)
 # -----------------------------
 with tab2:
     st.subheader("Anamnese tradicional")
 
-    with st.expander("QUEIXA PRINCIPAL", expanded=True):
+    # Bloco principal (similar ao layout: campos empilhados)
+    with st.container(border=True):
+        st.markdown("#### QUEIXA PRINCIPAL")
         qp = st.text_area(" ", key="qp", height=140, placeholder="Descreva a queixa principal...")
 
-    with st.expander("HDA", expanded=False):
-        hda = st.text_area(" ", key="hda", height=120, placeholder="História da Doença Atual...")
+        st.markdown("#### HDA")
+        hda = st.text_area("  ", key="hda", height=120, placeholder="História da Doença Atual...")
 
-    with st.expander("HPP", expanded=False):
-        hpp = st.text_area(" ", key="hpp", height=120, placeholder="História Patológica Pregressa...")
+        st.markdown("#### HPP")
+        hpp = st.text_area("   ", key="hpp", height=120, placeholder="História Patológica Pregressa...")
 
-    col_hf, col_hs = st.columns(2)
-    with col_hf:
-        with st.expander("HF", expanded=False):
-            hf = st.text_area(" ", key="hf", height=110, placeholder="História Familiar...")
-    with col_hs:
-        with st.expander("HS", expanded=False):
-            hs = st.text_area(" ", key="hs", height=110, placeholder="História Social...")
+        col_hf, col_hs = st.columns(2)
+        with col_hf:
+            st.markdown("#### HF")
+            hf = st.text_area("    ", key="hf", height=110, placeholder="História Familiar...")
+        with col_hs:
+            st.markdown("#### HS")
+            hs = st.text_area("     ", key="hs", height=110, placeholder="História Social...")
 
-    with st.expander("MED", expanded=False):
-        med = st.text_area(" ", key="med", height=110, placeholder="Medicações em uso...")
+        st.markdown("#### MED")
+        med = st.text_area("      ", key="med", height=110, placeholder="Medicações em uso...")
 
-    with st.expander("ALERGIA", expanded=False):
-        alergia = st.text_area(" ", key="alergia", height=110, placeholder="Alergias...")
+        st.markdown("#### ALERGIA")
+        alergia = st.text_area("       ", key="alergia", height=110, placeholder="Alergias...")
 
-    with st.expander("HD:", expanded=False):
-        hd = st.text_area(" ", key="hd", height=110, placeholder="Hipótese Diagnóstica...")
+        st.markdown("#### HD")
+        hd = st.text_area("        ", key="hd", height=110, placeholder="Hipótese Diagnóstica...")
 
-    with st.expander("CD:", expanded=False):
-        cd = st.text_area(" ", key="cd", height=110, placeholder="Conduta...")
+        st.markdown("#### CD")
+        cd = st.text_area("         ", key="cd", height=110, placeholder="Conduta...")
 
     if st.button("Salvar (Anamnese)", type="primary"):
         payload = {
@@ -172,7 +249,6 @@ with tab2:
             "hd": st.session_state.get("hd", "").strip(),
             "cd": st.session_state.get("cd", "").strip(),
         }
-        # exige ao menos queixa principal para salvar
         if payload["queixa_principal"]:
             salvar_registro("anamnese_tradicional", payload)
             st.success("Anamnese salva!")
@@ -187,56 +263,44 @@ with tab3:
 
     s = st.text_area("Subjetivo (S)", height=140, placeholder="Queixas, percepções do paciente, sintomas...")
     o = st.text_area("Objetivo (O)", height=140, placeholder="Exame físico, sinais, medidas, exames...")
-    a = st.text_area("Avaliação (A)", height=140, placeholder="Raciocínio clínico, hipóteses, diagnóstico...")
+
+    st.markdown("#### Avaliação (A)")
+    a = st.text_area(" ", height=140, placeholder="Raciocínio clínico, hipóteses, diagnóstico...")
 
     st.markdown("#### CID na Avaliação")
-    # Lista simples (pode ser trocada por base completa depois)
     cids = [
         ("Z00.0", "Exame geral de rotina"),
         ("I10", "Hipertensão essencial (primária)"),
         ("E11", "Diabetes mellitus tipo 2"),
-        ("J06.9", "Infecção aguda das vias aéreas superiores, não especificada"),
+        ("J06.9", "IVAS aguda, não especificada"),
         ("M54.5", "Dor lombar baixa"),
         ("F41.1", "Transtorno de ansiedade generalizada"),
     ]
     cid_opcoes = [f"{cod} — {desc}" for cod, desc in cids]
     cid_escolhido = st.selectbox("Selecione um CID", options=cid_opcoes, index=0)
-    inserir_problema = st.checkbox("Inserir na lista de problemas", value=False)
 
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        if st.button("Salvar (SOAP)", type="primary", use_container_width=True):
-            payload = {
-                "subjetivo": s.strip(),
-                "objetivo": o.strip(),
-                "avaliacao": a.strip(),
-                "cid": cid_escolhido.split(" — ")[0],
-                "cid_descricao": cid_escolhido.split(" — ", 1)[1],
-                "inserir_na_lista_problemas": inserir_problema,
-            }
+    inserir_problema = st.checkbox("Inserir na lista de problemas (ativa)", value=False)
 
-            if payload["subjetivo"] or payload["objetivo"] or payload["avaliacao"]:
-                salvar_registro("soap", payload)
+    if st.button("Salvar (SOAP)", type="primary"):
+        payload = {
+            "subjetivo": s.strip(),
+            "objetivo": o.strip(),
+            "avaliacao": a.strip(),
+            "cid": cid_escolhido.split(" — ")[0],
+            "cid_descricao": cid_escolhido.split(" — ", 1)[1],
+            "inserir_na_lista_problemas": inserir_problema,
+        }
 
-                if inserir_problema:
-                    st.session_state.problemas.append({
-                        "cid": payload["cid"],
-                        "descricao": payload["cid_descricao"],
-                        "data_hora": agora_str(),
-                    })
+        if payload["subjetivo"] or payload["objetivo"] or payload["avaliacao"]:
+            salvar_registro("soap", payload)
 
-                st.success("SOAP salvo!")
-            else:
-                st.warning("Preencha ao menos um campo (S, O ou A) para salvar.")
-    with col2:
-        st.caption("O CID selecionado e o flag de problema ficam registrados no JSON.")
+            if inserir_problema:
+                pac["problemas"].append({
+                    "cid": payload["cid"],
+                    "descricao": payload["cid_descricao"],
+                    "status": "Ativo",
+                })
 
-# -----------------------------
-# Preview rápido dos últimos registros
-# -----------------------------
-st.markdown("---")
-with st.expander("Ver últimos registros salvos", expanded=False):
-    if st.session_state.registros:
-        st.json(st.session_state.registros[-3:])  # mostra os 3 últimos
-    else:
-        st.caption("Nenhum registro salvo ainda.")
+            st.success("SOAP salvo!")
+        else:
+            st.warning("Preencha ao menos um campo (S, O ou A) para salvar.")

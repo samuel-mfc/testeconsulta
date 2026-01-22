@@ -260,10 +260,10 @@ with tab2:
 # -----------------------------
 with tab3:
     st.subheader("SOAP")
-
-    s = st.text_area("Subjetivo (S)", height=140, placeholder="Queixas, percepções do paciente, sintomas...")
-    o = st.text_area("Objetivo (O)", height=140, placeholder="Exame físico, sinais, medidas, exames...")
-
+    st.markdown("#### Subjetivo (S)")
+    s = st.text_area(" ", height=140, placeholder="Queixas, percepções do paciente, sintomas...")
+    st.markdown("#### Objetivo (O)")
+    o = st.text_area(" ", height=140, placeholder="Exame físico, sinais, medidas, exames...")
     st.markdown("#### Avaliação (A)")
     a = st.text_area(" ", height=140, placeholder="Raciocínio clínico, hipóteses, diagnóstico...")
 
@@ -279,7 +279,10 @@ with tab3:
     cid_opcoes = [f"{cod} — {desc}" for cod, desc in cids]
     cid_escolhido = st.selectbox("Selecione um CID", options=cid_opcoes, index=0)
 
-    inserir_problema = st.checkbox("Inserir na lista de problemas (ativa)", value=False)
+    inserir_problema = st.checkbox("Inserir na lista de problemas ativos?", value=False)
+
+    st.markdown("#### Plano (P)")
+    p = st.text_area(" ", height=140, placeholder="Conduta, orientações, pendências...")
 
     if st.button("Salvar (SOAP)", type="primary"):
         payload = {
@@ -291,7 +294,7 @@ with tab3:
             "inserir_na_lista_problemas": inserir_problema,
         }
 
-        if payload["subjetivo"] or payload["objetivo"] or payload["avaliacao"]:
+        if payload["subjetivo"] or payload["objetivo"] or payload["avaliacao"] or payload["plano"]:
             salvar_registro("soap", payload)
 
             if inserir_problema:

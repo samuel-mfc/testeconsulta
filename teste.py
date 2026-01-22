@@ -287,7 +287,7 @@ with tab3:
             "subjetivo": s.strip(),
             "objetivo": o.strip(),
             "avaliacao": a.strip(),
-            "plano": p.strip()
+            "plano": p.strip(),
             "cid": cid_escolhido.split(" — ")[0],
             "cid_descricao": cid_escolhido.split(" — ", 1)[1],
             "inserir_na_lista_problemas": inserir_problema,
